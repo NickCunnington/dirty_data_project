@@ -1,0 +1,69 @@
+---
+title: "task1_analysis"
+author: "Nick Cunnington"
+date: "20/07/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(here)
+here::here()
+clean_data <- read_csv(here("clean_data/clean_data.csv"))
+```
+
+# longest long jump
+
+```{r}
+longest_long_jump <- clean_data %>%
+  select(names, long_jump, competition) %>%
+  arrange(desc(long_jump)) %>%
+  head(1)
+longest_long_jump
+
+```
+
+
+# Average 100m time in each competition
+
+```{r}
+average_100m <- clean_data %>%
+  group_by(competition) %>%
+  summarise(average_100m = mean(x100m))
+  
+average_100m
+```
+
+# who had the highest total points across both competitions
+
+```{r}
+olympicg_points <- clean_data %>%
+  select(names, points, competition) %>%
+  filter(competition == "OlympicG") 
+
+decastar_points <- clean_data %>%
+  select(names, points, competition) %>%
+   filter(competition == "Decastar")
+
+```
+
+```{r}
+clean_data %>%
+  select(names, points) %>%
+  group_by(names) %>%
+  summarise(total_points = sum(points)) %>%
+  arrange(desc(total_points)) %>%
+  head(1)
+  
+```
+
+# What was the shot-put scores for the top three competitors in each competition
+
+```{r}
+
+```
+
