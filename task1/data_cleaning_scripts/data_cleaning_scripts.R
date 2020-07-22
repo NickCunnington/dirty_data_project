@@ -15,11 +15,11 @@ raw_data$names <- tolower(raw_data$name)
 raw_data <- clean_names(raw_data)
 
 #save clean data
-write_csv(raw_data, "clean_data/clean_data.csv")
+write_rds(raw_data, "clean_data/clean_data.rds")
 
 #convert table into long format
 raw_data_long <- raw_data %>%
   pivot_longer(c(-names, -competition, -rank), names_to = "event", values_to = "result")
 
 #saving clean data in long format
-write_csv(raw_data_long, "clean_data/clean_data_long.csv")
+write_rds(raw_data_long, "clean_data/clean_data_long.rds")

@@ -13,43 +13,28 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(here)
 here::here()
-clean_data <- read_csv(here("clean_data/clean_data.csv"))
+clean_data <- read_rds(here("clean_data/clean_data.rds"))
 ```
 
 # longest long jump
 
 ```{r}
-longest_long_jump <- clean_data %>%
+clean_data %>%
   select(names, long_jump, competition) %>%
   arrange(desc(long_jump)) %>%
   head(1)
-longest_long_jump
-
 ```
 
 
 # Average 100m time in each competition
 
 ```{r}
-average_100m <- clean_data %>%
+clean_data %>%
   group_by(competition) %>%
   summarise(average_100m = mean(x100m))
-  
-average_100m
 ```
 
 # who had the highest total points across both competitions
-
-```{r}
-olympicg_points <- clean_data %>%
-  select(names, points, competition) %>%
-  filter(competition == "OlympicG") 
-
-decastar_points <- clean_data %>%
-  select(names, points, competition) %>%
-   filter(competition == "Decastar")
-
-```
 
 ```{r}
 clean_data %>%
@@ -64,6 +49,35 @@ clean_data %>%
 # What was the shot-put scores for the top three competitors in each competition
 
 ```{r}
+shotput_decastar <- clean_data %>%
+  select(names, shot_put, competition) %>%
+  filter(competition == "Decastar") %>%
+  arrange(desc(shot_put)) %>%
+  head(3)
+shotput_decastar
 
+shotput_olympicg <- clean_data %>%
+  select(names, shot_put, competition) %>%
+  filter(competition == "OlympicG") %>%
+  arrange(desc(shot_put)) %>%
+  head(3)
+shotput_olympicg
+```
+
+# What was the average points for competitors who ran the 400m in less than 50 seconds vs those that ran the 400m in more than 50 seconds
+
+```{r}
+x400m_under50 <- clean_data %>%
+  select(names, x400m, points) %>%
+  filter(x400m < 50) %>%
+  summarise(average_poins = mean(points))
+round(x400m_under50)
+
+x400m_over50 <- clean_data %>%
+  select(names, x400m, points) %>%
+  filter(x400m > 50) %>%
+  summarise(averge_points = mean(points))
+round(x400m_over50)
+  
 ```
 
