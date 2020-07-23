@@ -1,0 +1,113 @@
+---
+title: "analysis"
+author: "Nick Cunnington"
+date: "23/07/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(here)
+```
+
+```{r}
+here::here()
+candy <- read_csv(here("clean_data/candy.csv"), guess_max = 1000000)
+```
+
+
+
+# What is the total number of candy ratings given across the three years?
+
+```{r}
+candy %>%
+  select(rating) %>%
+  drop_na(rating) %>%
+  summarise(average_rating = n())
+```
+
+
+# What was the average age of people who are going out trick or treating and the average age of people who are not going trick or treating?
+
+Average age of people who go out trick or treating
+```{r}
+candy %>%
+  select(trick_or_treating, age) %>%
+  drop_na(trick_or_treating) %>%
+  drop_na(age) %>%
+  filter(trick_or_treating == "yes") %>%
+  summarise(average_age = round(mean(age), digits=1))
+```
+
+Average age of people who do not go out trick or treating
+```{r}
+candy %>%
+  select(trick_or_treating, age) %>%
+  drop_na(trick_or_treating) %>%
+  drop_na(age) %>%
+  filter(trick_or_treating == "no") %>%
+  summarise(average_age = round(mean(age), digits=1))
+
+```
+
+# For each of the joy, despair and meh, which candy bar received the most of these ratings?
+
+Joy Ratings
+```{r}
+candy %>%
+  select(candy_type, rating) %>%
+  filter(rating == "joy") %>%
+  count(candy_type, sort = TRUE) %>%
+  head(1)
+```
+
+
+Despair Rating
+```{r}
+candy %>%
+  select(candy_type, rating) %>%
+  filter(rating == "despair") %>%
+  count(candy_type, sort = TRUE) %>%
+  head(1)
+```
+
+Meh rating
+```{r}
+candy %>%
+  select(candy_type, rating) %>%
+  filter(rating == "meh") %>%
+  count(candy_type, sort = TRUE) %>%
+  head(1)
+```
+
+
+# How many people rated Starburst as despair?
+
+```{r}
+candy %>%
+  select(candy_type, rating) %>%
+  filter(rating == "despair") %>%
+  filter(candy_type == "starburst") %>%
+  count(candy_type)
+```
+
+
+# What was the most popular candy bar by the rating system for each gender in the dataset?
+
+```{r}
+candy %>%
+  select(gender, candy_type, rating) %>%
+  filter(rating == "joy") %>%
+  group_by(gender) %>%
+  count(gender, candy_type)
+
+# needs more work!
+```
+
+
+

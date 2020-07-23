@@ -141,6 +141,9 @@ colnames(candy_2015_ordered)[2] <- "age"
 colnames(candy_2015_ordered)[3] <- "trick_or_treating"
 colnames(candy_2015_ordered)[4] <- "country"
 colnames(candy_2015_ordered)[5] <- "gender"
+candy_2015_ordered <- candy_2015_ordered %>%
+  mutate(gender = as.character(gender)) %>%
+  mutate(gender = as.character(country))
 
 
 #order 2016 data ----
@@ -153,7 +156,7 @@ colnames(candy_2016_ordered)[5] <- "gender"
 
 
 #order and rename 2017 data ----
-candy_2017_ordered <- candy_2017_shortened[,c(98, 3, 1, 2, 4, 5:97)]
+candy_2017_ordered <- candy_2017_shortened[,c(98, 3, 1, 4, 2, 5:97)]
 names(candy_2017_ordered) <- substring(names(candy_2017_ordered), 4)
 colnames(candy_2017_ordered)[1] <- "year"
 colnames(candy_2017_ordered)[2] <- "age"
@@ -200,5 +203,19 @@ rm(candy_2017_shortened)
 rm(candy_2017_ordered)
 
 
+#join all years together ----
+candy_merged <- bind_rows(candy_2015_pivoted, candy_2016_pivoted, candy_2017_pivoted)
 
 
+#format age column and filter >5 and <100 ----
+candy_merged <- candy_merged %>%
+  mutate(age = as.double(age)) %>%
+  mutate(age = ifelse(age > 100, NA, age)) %>%
+  mutate(age = ifelse(age < 5, NA, age))
+
+
+#write to clean csv ----
+write_csv(candy_merged, "clean_data/candy.csv")
+rm(candy_2015_pivoted)
+rm(candy_2016_pivoted)
+rm(candy_2017_pivoted)
