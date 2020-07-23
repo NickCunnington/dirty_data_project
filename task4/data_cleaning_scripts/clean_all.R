@@ -136,41 +136,49 @@ candy_2015_shortened$your_gender = NA
 
 #order 2015 data ----
 candy_2015_ordered <- candy_2015_shortened[,c(1, 2, 3, 87, 86, 4:85)]
-colnames(candy_2015_ordered)[3] <- "are_you_going_trick_or_treating"
+colnames(candy_2015_ordered)[1] <- "year"
+colnames(candy_2015_ordered)[2] <- "age"
+colnames(candy_2015_ordered)[3] <- "trick_or_treating"
+colnames(candy_2015_ordered)[4] <- "country"
+colnames(candy_2015_ordered)[5] <- "gender"
 
 
 #order 2016 data ----
 candy_2016_ordered <- candy_2016_shortened[,c(1, 4, 2, 5, 3, 6:91)]
-colnames(candy_2016_ordered)[3] <- "are_you_going_trick_or_treating"
+colnames(candy_2016_ordered)[1] <- "year"
+colnames(candy_2016_ordered)[2] <- "age"
+colnames(candy_2016_ordered)[3] <- "trick_or_treating"
+colnames(candy_2016_ordered)[4] <- "country"
+colnames(candy_2016_ordered)[5] <- "gender"
 
 
 #order and rename 2017 data ----
 candy_2017_ordered <- candy_2017_shortened[,c(98, 3, 1, 2, 4, 5:97)]
 names(candy_2017_ordered) <- substring(names(candy_2017_ordered), 4)
-colnames(candy_2017_ordered)[1] <- "timestamp"
-colnames(candy_2017_ordered)[2] <- "how_old_are_you"
-colnames(candy_2017_ordered)[3] <- "are_you_going_trick_or_treating"
-colnames(candy_2017_ordered)[4] <- "which_country_do_you_live_in"
-colnames(candy_2017_ordered)[5] <- "your_gender"
+colnames(candy_2017_ordered)[1] <- "year"
+colnames(candy_2017_ordered)[2] <- "age"
+colnames(candy_2017_ordered)[3] <- "trick_or_treating"
+colnames(candy_2017_ordered)[4] <- "country"
+colnames(candy_2017_ordered)[5] <- "gender"
 colnames(candy_2017_ordered)[6] <- "x100_grand_bar"
 
 
 #pivoting tables ----
 candy_2015_pivoted <- candy_2015_ordered %>%
   pivot_longer(cols = 6:87,
-               names_to = "type_of_candy",
+               names_to = "candy_type",
                values_to = "rating")
 
 
 candy_2016_pivoted <- candy_2016_ordered %>%
   pivot_longer(cols = 6:91,
-               names_to = "type_of_candy",
+               names_to = "candy_type",
                values_to = "rating")
 
 
 candy_2017_pivoted <- candy_2017_ordered %>%
   pivot_longer(cols = 6:98,
-               names_to = "type_of_candy",
+               names_to = "candy_type",
                values_to = "rating")
 
 
