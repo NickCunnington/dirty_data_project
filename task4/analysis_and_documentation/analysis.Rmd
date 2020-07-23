@@ -1,5 +1,5 @@
 ---
-title: "analysis"
+title: "Task 4 Analysis"
 author: "Nick Cunnington"
 date: "23/07/2020"
 output: html_document
@@ -9,20 +9,20 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r, include=FALSE}
 library(tidyverse)
 library(readxl)
 library(here)
 ```
 
-```{r}
+```{r, include=FALSE}
 here::here()
 candy <- read_csv(here("clean_data/candy.csv"), guess_max = 1000000)
 ```
 
+<br>
 
-
-# What is the total number of candy ratings given across the three years?
+# 1. What is the total number of candy ratings given across the three years?
 
 ```{r}
 candy %>%
@@ -31,10 +31,11 @@ candy %>%
   summarise(average_rating = n())
 ```
 
+<br>
 
-# What was the average age of people who are going out trick or treating and the average age of people who are not going trick or treating?
+# 2. What was the average age of people who are going out trick or treating and the average age of people who are not going trick or treating?
 
-Average age of people who go out trick or treating
+**Average age of people who go out trick or treating**
 ```{r}
 candy %>%
   select(trick_or_treating, age) %>%
@@ -44,7 +45,7 @@ candy %>%
   summarise(average_age = round(mean(age), digits=1))
 ```
 
-Average age of people who do not go out trick or treating
+**Average age of people who do not go out trick or treating**
 ```{r}
 candy %>%
   select(trick_or_treating, age) %>%
@@ -54,10 +55,11 @@ candy %>%
   summarise(average_age = round(mean(age), digits=1))
 
 ```
+<br>
 
-# For each of the joy, despair and meh, which candy bar received the most of these ratings?
+# 3. For each of the joy, despair and meh, which candy bar received the most of these ratings?
 
-Joy Ratings
+**Joy Ratings**
 ```{r}
 candy %>%
   select(candy_type, rating) %>%
@@ -66,8 +68,7 @@ candy %>%
   head(1)
 ```
 
-
-Despair Rating
+**Despair Rating**
 ```{r}
 candy %>%
   select(candy_type, rating) %>%
@@ -76,7 +77,7 @@ candy %>%
   head(1)
 ```
 
-Meh rating
+**Meh rating**
 ```{r}
 candy %>%
   select(candy_type, rating) %>%
@@ -85,8 +86,9 @@ candy %>%
   head(1)
 ```
 
+<br>
 
-# How many people rated Starburst as despair?
+# 4.How many people rated Starburst as despair?
 
 ```{r}
 candy %>%
@@ -96,18 +98,56 @@ candy %>%
   count(candy_type)
 ```
 
+<br>
 
-# What was the most popular candy bar by the rating system for each gender in the dataset?
+# 5. What was the most popular candy bar by the rating system for each gender in the dataset?
 
+**Favourite candy by females**
 ```{r}
 candy %>%
   select(gender, candy_type, rating) %>%
   filter(rating == "joy") %>%
-  group_by(gender) %>%
-  count(gender, candy_type)
+  filter(gender == "female") %>%
+  count(gender, candy_type) %>%
+  arrange(desc(n)) %>%
+  head(1)
 
-# needs more work!
+
+
 ```
 
+**Favourite candy by males**
+```{r}
+candy %>%
+  select(gender, candy_type, rating) %>%
+  filter(rating == "joy") %>%
+  filter(gender == "male") %>%
+  count(gender, candy_type) %>%
+  arrange(desc(n)) %>%
+  head(1)
 
+```
+
+**Favourite candy by 'prefer not to say'**
+```{r}
+candy %>%
+  select(gender, candy_type, rating) %>%
+  filter(rating == "joy") %>%
+  filter(gender == "i'd rather not say") %>%
+  count(gender, candy_type) %>%
+  arrange(desc(n)) %>%
+  head(1)
+
+```
+
+**Favourite candy by 'other'**
+```{r}
+candy %>%
+  select(gender, candy_type, rating) %>%
+  filter(rating == "joy") %>%
+  filter(gender == "other") %>%
+  count(gender, candy_type) %>%
+  arrange(desc(n)) %>%
+  head(1)
+```
 
