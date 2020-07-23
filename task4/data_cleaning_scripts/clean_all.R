@@ -2,22 +2,25 @@ library(tidyverse)
 library(readxl)
 library(janitor)
 
+#read in xlsx files
 candy_2015 <- readxl::read_xlsx("raw_data/candy_ranking_data/boing-boing-candy-2015.xlsx")
 candy_2016 <- readxl::read_xlsx("raw_data/candy_ranking_data/boing-boing-candy-2016.xlsx")
 candy_2017 <- readxl::read_xlsx("raw_data/candy_ranking_data/boing-boing-candy-2017.xlsx")
 
 
-#clean row names
+#clean up row names ----
 candy_2015_named <- clean_names(candy_2015)
 candy_2016_named <- clean_names(candy_2016)
 candy_2017_named <- clean_names(candy_2017)
 
-#turn everything into lower case
+
+#turn everything into lower case ----
 candy_2015_lower <-  mutate_if(candy_2015_named, is.character, str_to_lower)
 candy_2016_lower <-  mutate_if(candy_2016_named, is.character, str_to_lower)
 candy_2017_lower <-  mutate_if(candy_2017_named, is.character, str_to_lower)
 
-#remove columns that are not required
+
+#remove columns that are not required ----
 candy_2015_shortened <- candy_2015_lower %>%
   select(-please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_beyonce,
          -please_leave_any_remarks_or_comments_regarding_your_choices,
@@ -56,8 +59,9 @@ candy_2015_shortened <- candy_2015_lower %>%
          -vicodin,
          -peterson_brand_sidewalk_chalk,
          -creepy_religious_comics_chick_tracts,
-         -kale_smoothie)
-
+         -kale_smoothie,
+         -whole_wheat_anything,
+         -lapel_pins)
 
 candy_2016_shortened <- candy_2016_lower %>%
   select(-person_of_interest_season_3_dvd_box_set_not_including_disc_4_with_hilarious_outtakes,
@@ -90,9 +94,8 @@ candy_2016_shortened <- candy_2016_lower %>%
          -broken_glow_stick,
          -bonkers_the_board_game,
          -which_state_province_county_do_you_live_in,
-         -your_gender,
-         -dental_paraphenalia)      
-
+         -dental_paraphenalia,
+         -kale_smoothie)      
 
 candy_2017_shortened <- candy_2017_lower %>%
   select(-q6_real_housewives_of_orange_county_season_9_blue_ray,
@@ -108,7 +111,6 @@ candy_2017_shortened <- candy_2017_lower %>%
          -click_coordinates_x_y,
          -q7_joy_other,
          -q8_despair_other,
-         -q2_gender,
          -internal_id,
          -q5_state_province_county_etc,
          -q6_white_bread,
@@ -117,49 +119,78 @@ candy_2017_shortened <- candy_2017_lower %>%
          -q6_glow_sticks,
          -q6_broken_glow_stick,
          -q6_dental_paraphenalia,
-         -q6_chardonnay)
+         -q6_chardonnay,
+         -q6_whole_wheat_anything)
 
 
-rm(candy_2015)
-rm(candy_2015_lower)
-rm(candy_2015_named)
-rm(candy_2016)
-rm(candy_2016_lower)
-rm(candy_2016_named)
-rm(candy_2017)
-rm(candy_2017_lower)
-rm(candy_2017_named)
-
-#set years
+#set years ----
 candy_2015_shortened$timestamp = "2015"
 candy_2016_shortened$timestamp = "2016"
 candy_2017_shortened$timestamp = "2017"
 
 
-#enter in a columns of NAs for country in 2015 data
+#enter in a columns for country and gender in 2015 ----
 candy_2015_shortened$which_country_do_you_live_in = NA
-candy_2015_shortened <- candy_2015_shortened[,c(1, 2, 3, 88, 4:87)]
+candy_2015_shortened$your_gender = NA
 
-#order 2015 data in alphabetical order and move country, year, trick/treat and age
-candy_2015_alphabet <- candy_2015_shortened %>%
-  select(sort(tidyselect::peek_vars()))
-candy_2015_ordered <- candy_2015_alphabet[,c(80, 85, 29, 3, 1, 2, 4:28, 30:79, 81:84, 86:88)]
-View(candy_2015_ordered)
 
-#order 2016 data in alphabetical order and move country, year, trick/treat and age
-candy_2016_alphabet <- candy_2016_shortened %>%
-  select(sort(tidyselect::peek_vars()))
-candy_2016_ordered <- candy_2016_alphabet[,c(83, 89, 30, 3, 1, 2, 4:29, 31:82, 84:88, 90, 91)]
-View(candy_2016_ordered)
+#order 2015 data ----
+candy_2015_ordered <- candy_2015_shortened[,c(1, 2, 3, 87, 86, 4:85)]
+colnames(candy_2015_ordered)[3] <- "are_you_going_trick_or_treating"
 
-#order 2017 data in alphabetical order and move country, year, trick/treat and age
-candy_2017_alphabet <- candy_2017_shortened %>%
-  select(sort(tidyselect::peek_vars()))
-candy_2017_alphabet <- candy_2017_alphabet[,c(98, 1:97)]
 
-View(candy_2017_alphabet)
+#order 2016 data ----
+candy_2016_ordered <- candy_2016_shortened[,c(1, 4, 2, 5, 3, 6:91)]
+colnames(candy_2016_ordered)[3] <- "are_you_going_trick_or_treating"
 
-names_2015 <- names(candy_2015_ordered)
-names_2015
-names_2016 <- names(candy_2016_ordered)
-names_2016
+
+#order and rename 2017 data ----
+candy_2017_ordered <- candy_2017_shortened[,c(98, 3, 1, 2, 4, 5:97)]
+names(candy_2017_ordered) <- substring(names(candy_2017_ordered), 4)
+colnames(candy_2017_ordered)[1] <- "timestamp"
+colnames(candy_2017_ordered)[2] <- "how_old_are_you"
+colnames(candy_2017_ordered)[3] <- "are_you_going_trick_or_treating"
+colnames(candy_2017_ordered)[4] <- "which_country_do_you_live_in"
+colnames(candy_2017_ordered)[5] <- "your_gender"
+colnames(candy_2017_ordered)[6] <- "x100_grand_bar"
+
+
+#pivoting tables ----
+candy_2015_pivoted <- candy_2015_ordered %>%
+  pivot_longer(cols = 6:87,
+               names_to = "type_of_candy",
+               values_to = "rating")
+
+
+candy_2016_pivoted <- candy_2016_ordered %>%
+  pivot_longer(cols = 6:91,
+               names_to = "type_of_candy",
+               values_to = "rating")
+
+
+candy_2017_pivoted <- candy_2017_ordered %>%
+  pivot_longer(cols = 6:98,
+               names_to = "type_of_candy",
+               values_to = "rating")
+
+
+#remove old objects from global environment ----
+rm(candy_2015)
+rm(candy_2015_lower)
+rm(candy_2015_named)
+rm(candy_2015_shortened)
+rm(candy_2015_ordered)
+rm(candy_2016)
+rm(candy_2016_lower)
+rm(candy_2016_named)
+rm(candy_2016_shortened)
+rm(candy_2016_ordered)
+rm(candy_2017)
+rm(candy_2017_lower)
+rm(candy_2017_named)
+rm(candy_2017_shortened)
+rm(candy_2017_ordered)
+
+
+
+
