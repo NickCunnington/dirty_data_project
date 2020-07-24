@@ -370,8 +370,10 @@ summary {
 
 
 <p><br></p>
-<div id="who-had-the-longest-long-jump-seen-in-the-data" class="section level1">
-<h1>1. Who had the longest long jump seen in the data?</h1>
+<div id="tasks" class="section level1">
+<h1>Tasks</h1>
+<div id="who-had-the-longest-long-jump-seen-in-the-data" class="section level3">
+<h3>1. Who had the longest long jump seen in the data?</h3>
 <pre class="r"><code>clean_data %&gt;%
   select(names, long_jump, competition) %&gt;%
   arrange(desc(long_jump)) %&gt;%
@@ -380,8 +382,8 @@ summary {
 ## 1  clay      7.96    OlympicG</code></pre>
 <p><br></p>
 </div>
-<div id="what-was-the-average-100m-time-in-each-competition" class="section level1">
-<h1>2. What was the average 100m time in each competition?</h1>
+<div id="what-was-the-average-100m-time-in-each-competition" class="section level3">
+<h3>2. What was the average 100m time in each competition?</h3>
 <pre class="r"><code>clean_data %&gt;%
   group_by(competition) %&gt;%
   summarise(average_100m = mean(x100m))</code></pre>
@@ -393,8 +395,8 @@ summary {
 ## 2 OlympicG            10.9</code></pre>
 <p><br></p>
 </div>
-<div id="who-had-the-highest-total-points-across-both-competitions" class="section level1">
-<h1>3. Who had the highest total points across both competitions?</h1>
+<div id="who-had-the-highest-total-points-across-both-competitions" class="section level3">
+<h3>3. Who had the highest total points across both competitions?</h3>
 <pre class="r"><code>clean_data %&gt;%
   select(names, points) %&gt;%
   group_by(names) %&gt;%
@@ -408,8 +410,8 @@ summary {
 ## 1 sebrle        17110</code></pre>
 <p><br></p>
 </div>
-<div id="what-was-the-shot-put-scores-for-the-top-three-competitors-in-each-competition" class="section level1">
-<h1>3. What was the shot-put scores for the top three competitors in each competition?</h1>
+<div id="what-was-the-shot-put-scores-for-the-top-three-competitors-in-each-competition" class="section level3">
+<h3>4. What was the shot-put scores for the top three competitors in each competition?</h3>
 <p><strong>Decastar Competition</strong></p>
 <pre class="r"><code>shotput_decastar &lt;- clean_data %&gt;%
   select(names, shot_put, competition) %&gt;%
@@ -434,8 +436,8 @@ shotput_olympicg</code></pre>
 ## 3  macey    15.73    OlympicG</code></pre>
 <p><br></p>
 </div>
-<div id="what-was-the-average-points-for-competitors-who-ran-the-400m-in-less-than-50-seconds-vs-those-that-ran-the-400m-in-more-than-50-seconds" class="section level1">
-<h1>5. What was the average points for competitors who ran the 400m in less than 50 seconds vs those that ran the 400m in more than 50 seconds?</h1>
+<div id="what-was-the-average-points-for-competitors-who-ran-the-400m-in-less-than-50-seconds-vs-those-that-ran-the-400m-in-more-than-50-seconds" class="section level3">
+<h3>5. What was the average points for competitors who ran the 400m in less than 50 seconds vs those that ran the 400m in more than 50 seconds?</h3>
 <p><strong>Under 50 seconds</strong></p>
 <pre class="r"><code>x400m_under50 &lt;- clean_data %&gt;%
   select(names, x400m, points) %&gt;%
@@ -452,6 +454,7 @@ round(x400m_under50)</code></pre>
 round(x400m_over50)</code></pre>
 <pre><code>##   averge_points
 ## 1          7727</code></pre>
+</div>
 </div>
 
 

@@ -17,7 +17,9 @@ clean_data <- read_rds(here("clean_data/clean_data.rds"))
 ```
 <br>
 
-# 1. Who had the longest long jump seen in the data?
+# Tasks #
+
+### 1. Who had the longest long jump seen in the data? ###
 
 ```{r}
 clean_data %>%
@@ -28,7 +30,7 @@ clean_data %>%
 
 <br>
 
-# 2. What was the average 100m time in each competition?
+### 2. What was the average 100m time in each competition? ###
 
 ```{r}
 clean_data %>%
@@ -38,7 +40,7 @@ clean_data %>%
 
 <br>
 
-# 3. Who had the highest total points across both competitions?
+### 3. Who had the highest total points across both competitions? ###
 
 ```{r}
 clean_data %>%
@@ -51,7 +53,7 @@ clean_data %>%
 ```
 <br>
 
-# 3. What was the shot-put scores for the top three competitors in each competition?
+### 4. What was the shot-put scores for the top three competitors in each competition? ###
 
 **Decastar Competition**
 ```{r}
@@ -76,7 +78,7 @@ shotput_olympicg
 
 <br>
 
-# 5. What was the average points for competitors who ran the 400m in less than 50 seconds vs those that ran the 400m in more than 50 seconds?
+### 5. What was the average points for competitors who ran the 400m in less than 50 seconds vs those that ran the 400m in more than 50 seconds? ###
 
 **Under 50 seconds**
 ```{r}
