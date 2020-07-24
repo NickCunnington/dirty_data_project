@@ -20,7 +20,7 @@ candy_2016_lower <-  mutate_if(candy_2016_named, is.character, str_to_lower)
 candy_2017_lower <-  mutate_if(candy_2017_named, is.character, str_to_lower)
 
 
-#remove columns that are not required ----
+#remove columns that are not candy ----
 candy_2015_shortened <- candy_2015_lower %>%
   select(-please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_beyonce,
          -please_leave_any_remarks_or_comments_regarding_your_choices,
@@ -123,7 +123,7 @@ candy_2017_shortened <- candy_2017_lower %>%
          -q6_whole_wheat_anything)
 
 
-#set years ----
+#set the timestamp column to just a year----
 candy_2015_shortened$timestamp = "2015"
 candy_2016_shortened$timestamp = "2016"
 candy_2017_shortened$timestamp = "2017"
@@ -134,7 +134,7 @@ candy_2015_shortened$which_country_do_you_live_in = NA
 candy_2015_shortened$your_gender = NA
 
 
-#order 2015 data ----
+#re-order and re-name  ----
 candy_2015_ordered <- candy_2015_shortened[,c(1, 2, 3, 87, 86, 4:85)]
 colnames(candy_2015_ordered)[1] <- "year"
 colnames(candy_2015_ordered)[2] <- "age"
@@ -146,7 +146,7 @@ candy_2015_ordered <- candy_2015_ordered %>%
   mutate(gender = as.character(country))
 
 
-#order 2016 data ----
+#re-order and re-name 2016 data ----
 candy_2016_ordered <- candy_2016_shortened[,c(1, 4, 2, 5, 3, 6:91)]
 colnames(candy_2016_ordered)[1] <- "year"
 colnames(candy_2016_ordered)[2] <- "age"
@@ -155,7 +155,7 @@ colnames(candy_2016_ordered)[4] <- "country"
 colnames(candy_2016_ordered)[5] <- "gender"
 
 
-#order and rename 2017 data ----
+#re-order and re-name 2017 data ----
 candy_2017_ordered <- candy_2017_shortened[,c(98, 3, 1, 4, 2, 5:97)]
 names(candy_2017_ordered) <- substring(names(candy_2017_ordered), 4)
 colnames(candy_2017_ordered)[1] <- "year"
@@ -212,6 +212,30 @@ candy_merged <- candy_merged %>%
   mutate(age = as.double(age)) %>%
   mutate(age = ifelse(age > 100, NA, age)) %>%
   mutate(age = ifelse(age < 5, NA, age))
+
+
+#cleaning country column ----
+usa <- c("us", "u.s.a", "usa usa usa", "usa! usa! usa!", "united states of america",
+         "united states", "units states", "ussa", "u.s.a", "u.s", "murica", "merica",
+         "usa!", "usa (i think but it's an election year so who can really tell)",
+         "america", "the best one - usa", "the yoo ess of aaayyyyyy", "usa!!!!!!", 
+         "usa! usa!", "united sates", "sub-canadian north america... 'merica",
+         "trumpistan", "united stetes", "usa usa usa usa", "the united states of america",
+         "unite states", "u s", "insanity lately", "usa? hard to tell anymore", 
+         "'merica", "usas", "pittsberg", "new york", "california", "united stated",
+         " pretend to be from canada, but i am really from the united states.",
+         "ahem....amerca", "alaska", "n.america", "u s a", "united stated",
+         "usa usa usa!!!!", "u.s.a.", "u.s.", "united  states of america", "united state",
+         "united staes", "usausausa", "unhinged states", "north carolina", "unied states",
+         "usa? hard to tell anymore..", "pittsburgh", "new jersey", "united ststes",
+         "united statss", "murrika", "united statea", "n. america", "usaa")
+uk <- c("england", "united kingdom", "united kindom", "u.k.", "scotland", "endland")
+canada <- c("can", "canada`")
+
+candy_merged <- candy_merged %>%
+  mutate(country = ifelse(country %in% usa, "usa", country),
+         country = ifelse(country %in% uk, "uk", country),
+         country = ifelse(country %in% canada, "canada", country))
 
 
 #write to clean csv ----
