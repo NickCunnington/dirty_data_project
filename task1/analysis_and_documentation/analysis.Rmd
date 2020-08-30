@@ -13,74 +13,61 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(here)
 here::here()
-clean_data <- read_rds(here("clean_data/clean_data.rds"))
+decathalon <- read_csv(here("clean_data/decathlon_clean.csv"))
 ```
 <br>
 
-# Tasks #
+# Insights #
 
-### 1. Who had the longest long jump seen in the data? ###
+### Who had the longest long jump seen in the data? ###
 
 ```{r}
-clean_data %>%
-  select(names, long_jump, competition) %>%
-  arrange(desc(long_jump)) %>%
+decathalon %>%
+  filter(event == "long_jump") %>%
+  arrange(desc(score)) %>%
   head(1)
 ```
 
 <br>
 
-### 2. What was the average 100m time in each competition? ###
+### What was the average 100m time in each competition? ###
 
 ```{r}
-clean_data %>%
+decathalon %>%
+  filter(event == "running_100m") %>%
   group_by(competition) %>%
-  summarise(average_100m = mean(x100m))
+  summarise(av_time = mean(score))
 ```
 
 <br>
 
-### 3. Who had the highest total points across both competitions? ###
+### Who had the highest total points across both competitions? ###
 
 ```{r}
-clean_data %>%
-  select(names, points) %>%
-  group_by(names) %>%
-  summarise(total_points = sum(points)) %>%
-  arrange(desc(total_points)) %>%
+decathalon %>%
+  distinct(surname, competition, points) %>%
+  group_by(surname) %>%
+  summarise(points_total = sum(points)) %>%
+  arrange(desc(points_total)) %>%
   head(1)
   
 ```
 <br>
 
-### 4. What was the shot-put scores for the top three competitors in each competition? ###
+### What was the shot-put scores for the top three competitors in each competition? ###
 
-**Decastar Competition**
+
 ```{r}
-shotput_decastar <- clean_data %>%
-  select(names, shot_put, competition) %>%
-  filter(competition == "Decastar") %>%
-  arrange(desc(shot_put)) %>%
-  head(3)
-shotput_decastar
-```
-
-
-**OlympicG Competition**
-```{r}
-shotput_olympicg <- clean_data %>%
-  select(names, shot_put, competition) %>%
-  filter(competition == "OlympicG") %>%
-  arrange(desc(shot_put)) %>%
-  head(3)
-shotput_olympicg
+decathalon %>%
+  filter(rank <= 3) %>%
+  filter(event == "shot_put")
 ```
 
 <br>
 
-### 5. What was the average points for competitors who ran the 400m in less than 50 seconds vs those that ran the 400m in more than 50 seconds? ###
+### What was the average points for competitors who ran the 400m in less than 50 seconds vs those that ran the 400m in more than 50 seconds? ###
 
-**Under 50 seconds**
+
 ```{r}
 x400m_under50 <- clean_data %>%
   select(names, x400m, points) %>%
@@ -88,15 +75,5 @@ x400m_under50 <- clean_data %>%
   summarise(average_poins = mean(points))
 round(x400m_under50)
 
-```
-
-**Over 50 seconds**
-```{r}
-x400m_over50 <- clean_data %>%
-  select(names, x400m, points) %>%
-  filter(x400m > 50) %>%
-  summarise(averge_points = mean(points))
-round(x400m_over50)
-  
 ```
 

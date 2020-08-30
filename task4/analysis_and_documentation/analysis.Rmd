@@ -17,7 +17,8 @@ library(here)
 
 ```{r, include=FALSE}
 here::here()
-candy <- read_csv(here("clean_data/candy.csv"), guess_max = 1000000)
+candy <- read_csv(here("clean_data/candy_clean.csv"), col_types = 
+                    cols(gender = col_character(), country = col_character()))
 ```
 
 <br>
@@ -32,180 +33,45 @@ This dataset is a combination of 3 different datasets for the years of 2015, 201
 
 *During the cleaning of the data set some assumptions had to be made:*
 
-* There was a wide variety of ages so I filtered the range to be between 5 and 100 years old and all outliers were discarded
+* There was a wide variety of ages so I removed any entries for ages older that 99 
 * There was no country or gender information recorded in the 2015 dataset, so any analysis requiring that information should be considered carefully as any query from 2015 will be returned as NA and may skew any result when consider all years combined
-* There were a lot of extra non-candy related questions in all 3 years which I removed from the datasets
-
-### Data Cleaning ###
-
-I stared some basic cleaning and re-ordering of the 3 different datasets so that I was able to join them together by mostly using Tidyverse tools and some basic R commands.
-
-Firstly the column names were reformatted using the ```clean_names``` function, then everything was converted into lower case to make analysis easier.
-
-In order to remove a load of superfluous information I manually had to look at all the ```colnames``` and decide on what was a candy and what wasn't
-
-
-```
-candy_2015_shortened <- candy_2015_lower %>%
-  select(-please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_beyonce,
-         -please_leave_any_remarks_or_comments_regarding_your_choices,
-         -please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_jk_rowling,
-         -please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_jj_abrams,
-         -please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_beyonce,
-         -please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_bieber,
-         -please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_kevin_bacon,
-         -please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_francis_bacon_1561_1626,
-         -please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_bruce_lee,
-         -please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_jk_rowling,
-         -please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_malala_yousafzai,
-         -please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_thom_yorke,
-         -please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_jj_abrams,
-         -please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_hillary_clinton,
-         -please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_donald_trump,
-         -please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_beyonce_knowles,
-         -check_all_that_apply_i_cried_tears_of_sadness_at_the_end_of,
-         -that_dress_that_went_viral_early_this_year_when_i_first_saw_it_it_was,
-         -what_is_your_favourite_font,
-         -if_you_squint_really_hard_the_words_intelligent_design_would_look_like,
-         -fill_in_the_blank_taylor_swift_is_a_force_for,
-         -fill_in_the_blank_imitation_is_a_form_of,
-         -which_day_do_you_prefer_friday_or_sunday,
-         -guess_the_number_of_mints_in_my_hand,
-         -betty_or_veronica,
-         -please_list_any_items_not_included_above_that_give_you_joy,
-         -please_list_any_items_not_included_above_that_give_you_despair,
-         -hugs_actual_physical_hugs,
-         -generic_brand_acetaminophen,
-         -broken_glow_stick,
-         -glow_sticks,
-         -dental_paraphenalia,
-         -cash_or_other_forms_of_legal_tender,
-         -white_bread,
-         -vicodin,
-         -peterson_brand_sidewalk_chalk,
-         -creepy_religious_comics_chick_tracts,
-         -kale_smoothie,
-         -whole_wheat_anything,
-         -lapel_pins)
-```
-
-Afterwards the 3 data sets needed some re-arranging of the first 5 columns so that I was able to join them later.  I also renamed these columns so all the datasheets matched.
-
-```
-candy_2015_ordered <- candy_2015_shortened[,c(1, 2, 3, 87, 86, 4:85)]
-colnames(candy_2015_ordered)[1] <- "year"
-colnames(candy_2015_ordered)[2] <- "age"
-colnames(candy_2015_ordered)[3] <- "trick_or_treating"
-colnames(candy_2015_ordered)[4] <- "country"
-colnames(candy_2015_ordered)[5] <- "gender"
-candy_2015_ordered <- candy_2015_ordered %>%
-  mutate(gender = as.character(gender)) %>%
-  mutate(gender = as.character(country))
-```
-
-Next was to pivot all datasheets into a long format.
-
-```
-candy_2015_pivoted <- candy_2015_ordered %>%
-  pivot_longer(cols = 6:87,
-               names_to = "candy_type",
-               values_to = "rating")
-```
-
-The country column was particular dirty and required some time to look up every different spelling of country names and changing them to only one spelling.
-
-```
-usa <- c("us", "u.s.a", "usa usa usa", "usa! usa! usa!", "united states of america",
-         "united states", "units states", "ussa", "u.s.a", "u.s", "murica", "merica",
-         "usa!", "usa (i think but it's an election year so who can really tell)",
-         "america", "the best one - usa", "the yoo ess of aaayyyyyy", "usa!!!!!!", 
-         "usa! usa!", "united sates", "sub-canadian north america... 'merica",
-         "trumpistan", "united stetes", "usa usa usa usa", "the united states of america",
-         "unite states", "u s", "insanity lately", "usa? hard to tell anymore", 
-         "'merica", "usas", "pittsberg", "new york", "california", "united stated",
-         " pretend to be from canada, but i am really from the united states.",
-         "ahem....amerca", "alaska", "n.america", "u s a", "united stated",
-         "usa usa usa!!!!", "u.s.a.", "u.s.", "united  states of america", "united state",
-         "united staes", "usausausa", "unhinged states", "north carolina", "unied states",
-         "usa? hard to tell anymore..", "pittsburgh", "new jersey", "united ststes",
-         "united statss", "murrika", "united statea", "n. america", "usaa")
-uk <- c("england", "united kingdom", "united kindom", "u.k.", "scotland", "endland")
-canada <- c("can", "canada`")
-
-candy_merged <- candy_merged %>%
-  mutate(country = ifelse(country %in% usa, "usa", country),
-         country = ifelse(country %in% uk, "uk", country),
-         country = ifelse(country %in% canada, "canada", country))
-```
 
 
 
 <br>
 
-## Tasks ##
+# Insights #
 
-### 1. What is the total number of candy ratings given across the three years? ###
+### What is the total number of candy ratings given across the three years? ###
 
 ```{r}
 candy %>%
-  select(rating) %>%
-  drop_na(rating) %>%
-  summarise(average_rating = n())
+  filter(!is.na(rating)) %>%
+  nrow()
 ```
 
 <br>
 
-### 2. What was the average age of people who are going out trick or treating and the average age of people who are not going trick or treating? ###
+### What was the average age of people who are going out trick or treating and the average age of people who are not going trick or treating? ###
 
-**Average age of people who go out trick or treating**
+
 ```{r}
 candy %>%
-  select(trick_or_treating, age) %>%
-  drop_na(trick_or_treating) %>%
-  drop_na(age) %>%
-  filter(trick_or_treating == "yes") %>%
-  summarise(average_age = round(mean(age), digits=1))
+  group_by(going_out) %>%
+  summarise(avg_age = mean(age, na.rm = TRUE))
 ```
 
-**Average age of people who do not go out trick or treating**
-```{r}
-candy %>%
-  select(trick_or_treating, age) %>%
-  drop_na(trick_or_treating) %>%
-  drop_na(age) %>%
-  filter(trick_or_treating == "no") %>%
-  summarise(average_age = round(mean(age), digits=1))
 
-```
 <br>
 
-### 3. For each of the joy, despair and meh, which candy bar received the most of these ratings? ###
+### For each of the joy, despair and meh, which candy bar received the most of these ratings? ###
 
-**Joy Ratings**
 ```{r}
 candy %>%
-  select(candy_type, rating) %>%
-  filter(rating == "joy") %>%
-  count(candy_type, sort = TRUE) %>%
-  head(1)
-```
-
-**Despair Rating**
-```{r}
-candy %>%
-  select(candy_type, rating) %>%
-  filter(rating == "despair") %>%
-  count(candy_type, sort = TRUE) %>%
-  head(1)
-```
-
-**Meh rating**
-```{r}
-candy %>%
-  select(candy_type, rating) %>%
-  filter(rating == "meh") %>%
-  count(candy_type, sort = TRUE) %>%
-  head(1)
+  filter(!is.na(rating)) %>%
+  group_by(rating, candy) %>%
+  summarise(count = n()) %>%
+  filter(count == max(count))
 ```
 
 <br>
@@ -214,13 +80,50 @@ candy %>%
 
 ```{r}
 candy %>%
-  select(candy_type, rating) %>%
+  filter(candy == "starburst") %>%
   filter(rating == "despair") %>%
-  filter(candy_type == "starburst") %>%
-  count(candy_type)
+  summarise(id_count = n_distinct(person_id))
 ```
 
 <br>
 
+### What was the most popular candy bar for each gender? ###
 
+*Recoding ratings to be a number for easier caculation*
+```{r}
+candy <- candy %>%
+  mutate(rating_numeric = recode(rating, joy = 1, despair = -1, meh = 0))
+```
+
+
+```{r}
+candy %>%
+  group_by(gender, candy) %>%
+  summarise(avg_rating = mean(rating_numeric, na.rm = TRUE)) %>%
+  filter(avg_rating == max(avg_rating))
+```
+
+<br>
+
+### What was the most popular candy each the US, UK, Canada and other countries? ###
+
+```{r}
+candy %>%
+  mutate(country = if_else(country %in% c("united states", "canada", "united kingdom"), 
+                           country, "other")) %>%
+  group_by(country, candy) %>%
+  summarise(avg_rating = mean(rating_numeric, na.rm = TRUE)) %>%
+  filter(avg_rating == max(avg_rating))
+```
+
+<br>
+
+### What was the msot popular candys in each year? ###
+
+```{r}
+candy %>%
+  group_by(year, candy) %>%
+  summarise(avg_rating = mean(rating_numeric, na.rm = TRUE)) %>%
+  filter(avg_rating == max(avg_rating))
+```
 

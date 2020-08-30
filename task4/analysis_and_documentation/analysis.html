@@ -380,183 +380,119 @@ summary {
 <h3>Assumputions</h3>
 <p><em>During the cleaning of the data set some assumptions had to be made:</em></p>
 <ul>
-<li>There was a wide variety of ages so I filtered the range to be between 5 and 100 years old and all outliers were discarded</li>
+<li>There was a wide variety of ages so I removed any entries for ages older that 99</li>
 <li>There was no country or gender information recorded in the 2015 dataset, so any analysis requiring that information should be considered carefully as any query from 2015 will be returned as NA and may skew any result when consider all years combined</li>
-<li>There were a lot of extra non-candy related questions in all 3 years which I removed from the datasets</li>
 </ul>
-</div>
-<div id="data-cleaning" class="section level3">
-<h3>Data Cleaning</h3>
-<p>I stared some basic cleaning and re-ordering of the 3 different datasets so that I was able to join them together by mostly using Tidyverse tools and some basic R commands.</p>
-<p>Firstly the column names were reformatted using the <code>clean_names</code> function, then everything was converted into lower case to make analysis easier.</p>
-<p>In order to remove a load of superfluous information I manually had to look at all the <code>colnames</code> and decide on what was a candy and what wasn’t</p>
-<pre><code>candy_2015_shortened &lt;- candy_2015_lower %&gt;%
-  select(-please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_beyonce,
-         -please_leave_any_remarks_or_comments_regarding_your_choices,
-         -please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_jk_rowling,
-         -please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_jj_abrams,
-         -please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_beyonce,
-         -please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_bieber,
-         -please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_kevin_bacon,
-         -please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_francis_bacon_1561_1626,
-         -please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_bruce_lee,
-         -please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_jk_rowling,
-         -please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_malala_yousafzai,
-         -please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_thom_yorke,
-         -please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_jj_abrams,
-         -please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_hillary_clinton,
-         -please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_donald_trump,
-         -please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_beyonce_knowles,
-         -check_all_that_apply_i_cried_tears_of_sadness_at_the_end_of,
-         -that_dress_that_went_viral_early_this_year_when_i_first_saw_it_it_was,
-         -what_is_your_favourite_font,
-         -if_you_squint_really_hard_the_words_intelligent_design_would_look_like,
-         -fill_in_the_blank_taylor_swift_is_a_force_for,
-         -fill_in_the_blank_imitation_is_a_form_of,
-         -which_day_do_you_prefer_friday_or_sunday,
-         -guess_the_number_of_mints_in_my_hand,
-         -betty_or_veronica,
-         -please_list_any_items_not_included_above_that_give_you_joy,
-         -please_list_any_items_not_included_above_that_give_you_despair,
-         -hugs_actual_physical_hugs,
-         -generic_brand_acetaminophen,
-         -broken_glow_stick,
-         -glow_sticks,
-         -dental_paraphenalia,
-         -cash_or_other_forms_of_legal_tender,
-         -white_bread,
-         -vicodin,
-         -peterson_brand_sidewalk_chalk,
-         -creepy_religious_comics_chick_tracts,
-         -kale_smoothie,
-         -whole_wheat_anything,
-         -lapel_pins)</code></pre>
-<p>Afterwards the 3 data sets needed some re-arranging of the first 5 columns so that I was able to join them later. I also renamed these columns so all the datasheets matched.</p>
-<pre><code>candy_2015_ordered &lt;- candy_2015_shortened[,c(1, 2, 3, 87, 86, 4:85)]
-colnames(candy_2015_ordered)[1] &lt;- &quot;year&quot;
-colnames(candy_2015_ordered)[2] &lt;- &quot;age&quot;
-colnames(candy_2015_ordered)[3] &lt;- &quot;trick_or_treating&quot;
-colnames(candy_2015_ordered)[4] &lt;- &quot;country&quot;
-colnames(candy_2015_ordered)[5] &lt;- &quot;gender&quot;
-candy_2015_ordered &lt;- candy_2015_ordered %&gt;%
-  mutate(gender = as.character(gender)) %&gt;%
-  mutate(gender = as.character(country))</code></pre>
-<p>Next was to pivot all datasheets into a long format.</p>
-<pre><code>candy_2015_pivoted &lt;- candy_2015_ordered %&gt;%
-  pivot_longer(cols = 6:87,
-               names_to = &quot;candy_type&quot;,
-               values_to = &quot;rating&quot;)</code></pre>
-<p>The country column was particular dirty and required some time to look up every different spelling of country names and changing them to only one spelling.</p>
-<pre><code>usa &lt;- c(&quot;us&quot;, &quot;u.s.a&quot;, &quot;usa usa usa&quot;, &quot;usa! usa! usa!&quot;, &quot;united states of america&quot;,
-         &quot;united states&quot;, &quot;units states&quot;, &quot;ussa&quot;, &quot;u.s.a&quot;, &quot;u.s&quot;, &quot;murica&quot;, &quot;merica&quot;,
-         &quot;usa!&quot;, &quot;usa (i think but it&#39;s an election year so who can really tell)&quot;,
-         &quot;america&quot;, &quot;the best one - usa&quot;, &quot;the yoo ess of aaayyyyyy&quot;, &quot;usa!!!!!!&quot;, 
-         &quot;usa! usa!&quot;, &quot;united sates&quot;, &quot;sub-canadian north america... &#39;merica&quot;,
-         &quot;trumpistan&quot;, &quot;united stetes&quot;, &quot;usa usa usa usa&quot;, &quot;the united states of america&quot;,
-         &quot;unite states&quot;, &quot;u s&quot;, &quot;insanity lately&quot;, &quot;usa? hard to tell anymore&quot;, 
-         &quot;&#39;merica&quot;, &quot;usas&quot;, &quot;pittsberg&quot;, &quot;new york&quot;, &quot;california&quot;, &quot;united stated&quot;,
-         &quot; pretend to be from canada, but i am really from the united states.&quot;,
-         &quot;ahem....amerca&quot;, &quot;alaska&quot;, &quot;n.america&quot;, &quot;u s a&quot;, &quot;united stated&quot;,
-         &quot;usa usa usa!!!!&quot;, &quot;u.s.a.&quot;, &quot;u.s.&quot;, &quot;united  states of america&quot;, &quot;united state&quot;,
-         &quot;united staes&quot;, &quot;usausausa&quot;, &quot;unhinged states&quot;, &quot;north carolina&quot;, &quot;unied states&quot;,
-         &quot;usa? hard to tell anymore..&quot;, &quot;pittsburgh&quot;, &quot;new jersey&quot;, &quot;united ststes&quot;,
-         &quot;united statss&quot;, &quot;murrika&quot;, &quot;united statea&quot;, &quot;n. america&quot;, &quot;usaa&quot;)
-uk &lt;- c(&quot;england&quot;, &quot;united kingdom&quot;, &quot;united kindom&quot;, &quot;u.k.&quot;, &quot;scotland&quot;, &quot;endland&quot;)
-canada &lt;- c(&quot;can&quot;, &quot;canada`&quot;)
-
-candy_merged &lt;- candy_merged %&gt;%
-  mutate(country = ifelse(country %in% usa, &quot;usa&quot;, country),
-         country = ifelse(country %in% uk, &quot;uk&quot;, country),
-         country = ifelse(country %in% canada, &quot;canada&quot;, country))</code></pre>
 <p><br></p>
 </div>
 </div>
-<div id="tasks" class="section level2">
-<h2>Tasks</h2>
+<div id="insights" class="section level1">
+<h1>Insights</h1>
 <div id="what-is-the-total-number-of-candy-ratings-given-across-the-three-years" class="section level3">
-<h3>1. What is the total number of candy ratings given across the three years?</h3>
+<h3>What is the total number of candy ratings given across the three years?</h3>
 <pre class="r"><code>candy %&gt;%
-  select(rating) %&gt;%
-  drop_na(rating) %&gt;%
-  summarise(average_rating = n())</code></pre>
-<pre><code>## # A tibble: 1 x 1
-##   average_rating
-##            &lt;int&gt;
-## 1         671971</code></pre>
+  filter(!is.na(rating)) %&gt;%
+  nrow()</code></pre>
+<pre><code>## [1] 757108</code></pre>
 <p><br></p>
 </div>
 <div id="what-was-the-average-age-of-people-who-are-going-out-trick-or-treating-and-the-average-age-of-people-who-are-not-going-trick-or-treating" class="section level3">
-<h3>2. What was the average age of people who are going out trick or treating and the average age of people who are not going trick or treating?</h3>
-<p><strong>Average age of people who go out trick or treating</strong></p>
+<h3>What was the average age of people who are going out trick or treating and the average age of people who are not going trick or treating?</h3>
 <pre class="r"><code>candy %&gt;%
-  select(trick_or_treating, age) %&gt;%
-  drop_na(trick_or_treating) %&gt;%
-  drop_na(age) %&gt;%
-  filter(trick_or_treating == &quot;yes&quot;) %&gt;%
-  summarise(average_age = round(mean(age), digits=1))</code></pre>
-<pre><code>## # A tibble: 1 x 1
-##   average_age
-##         &lt;dbl&gt;
-## 1        35.2</code></pre>
-<p><strong>Average age of people who do not go out trick or treating</strong></p>
-<pre class="r"><code>candy %&gt;%
-  select(trick_or_treating, age) %&gt;%
-  drop_na(trick_or_treating) %&gt;%
-  drop_na(age) %&gt;%
-  filter(trick_or_treating == &quot;no&quot;) %&gt;%
-  summarise(average_age = round(mean(age), digits=1))</code></pre>
-<pre><code>## # A tibble: 1 x 1
-##   average_age
-##         &lt;dbl&gt;
-## 1        39.3</code></pre>
+  group_by(going_out) %&gt;%
+  summarise(avg_age = mean(age, na.rm = TRUE))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre><code>## # A tibble: 3 x 2
+##   going_out avg_age
+##   &lt;chr&gt;       &lt;dbl&gt;
+## 1 No           39.2
+## 2 Yes          35.1
+## 3 &lt;NA&gt;         42.3</code></pre>
 <p><br></p>
 </div>
 <div id="for-each-of-the-joy-despair-and-meh-which-candy-bar-received-the-most-of-these-ratings" class="section level3">
-<h3>3. For each of the joy, despair and meh, which candy bar received the most of these ratings?</h3>
-<p><strong>Joy Ratings</strong></p>
+<h3>For each of the joy, despair and meh, which candy bar received the most of these ratings?</h3>
 <pre class="r"><code>candy %&gt;%
-  select(candy_type, rating) %&gt;%
-  filter(rating == &quot;joy&quot;) %&gt;%
-  count(candy_type, sort = TRUE) %&gt;%
-  head(1)</code></pre>
-<pre><code>## # A tibble: 1 x 2
-##   candy_type                   n
-##   &lt;chr&gt;                    &lt;int&gt;
-## 1 any_full_sized_candy_bar  7589</code></pre>
-<p><strong>Despair Rating</strong></p>
-<pre class="r"><code>candy %&gt;%
-  select(candy_type, rating) %&gt;%
-  filter(rating == &quot;despair&quot;) %&gt;%
-  count(candy_type, sort = TRUE) %&gt;%
-  head(1)</code></pre>
-<pre><code>## # A tibble: 1 x 2
-##   candy_type                  n
-##   &lt;chr&gt;                   &lt;int&gt;
-## 1 gum_from_baseball_cards  7341</code></pre>
-<p><strong>Meh rating</strong></p>
-<pre class="r"><code>candy %&gt;%
-  select(candy_type, rating) %&gt;%
-  filter(rating == &quot;meh&quot;) %&gt;%
-  count(candy_type, sort = TRUE) %&gt;%
-  head(1)</code></pre>
-<pre><code>## # A tibble: 1 x 2
-##   candy_type     n
-##   &lt;chr&gt;      &lt;int&gt;
-## 1 lollipops   1570</code></pre>
+  filter(!is.na(rating)) %&gt;%
+  group_by(rating, candy) %&gt;%
+  summarise(count = n()) %&gt;%
+  filter(count == max(count))</code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;rating&#39; (override with `.groups` argument)</code></pre>
+<pre><code>## # A tibble: 3 x 3
+## # Groups:   rating [3]
+##   rating  candy                    count
+##   &lt;chr&gt;   &lt;chr&gt;                    &lt;int&gt;
+## 1 despair broken_glow_stick         7905
+## 2 joy     any_full_sized_candy_bar  7589
+## 3 meh     lollipops                 1570</code></pre>
 <p><br></p>
 </div>
 <div id="how-many-people-rated-starburst-as-despair" class="section level3">
 <h3>4.How many people rated Starburst as despair?</h3>
 <pre class="r"><code>candy %&gt;%
-  select(candy_type, rating) %&gt;%
+  filter(candy == &quot;starburst&quot;) %&gt;%
   filter(rating == &quot;despair&quot;) %&gt;%
-  filter(candy_type == &quot;starburst&quot;) %&gt;%
-  count(candy_type)</code></pre>
-<pre><code>## # A tibble: 1 x 2
-##   candy_type     n
-##   &lt;chr&gt;      &lt;int&gt;
-## 1 starburst   1990</code></pre>
+  summarise(id_count = n_distinct(person_id))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   id_count
+##      &lt;int&gt;
+## 1     1990</code></pre>
 <p><br></p>
+</div>
+<div id="what-was-the-most-popular-candy-bar-for-each-gender" class="section level3">
+<h3>What was the most popular candy bar for each gender?</h3>
+<p><em>Recoding ratings to be a number for easier caculation</em></p>
+<pre class="r"><code>candy &lt;- candy %&gt;%
+  mutate(rating_numeric = recode(rating, joy = 1, despair = -1, meh = 0))</code></pre>
+<pre class="r"><code>candy %&gt;%
+  group_by(gender, candy) %&gt;%
+  summarise(avg_rating = mean(rating_numeric, na.rm = TRUE)) %&gt;%
+  filter(avg_rating == max(avg_rating))</code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;gender&#39; (override with `.groups` argument)</code></pre>
+<pre><code>## # A tibble: 5 x 3
+## # Groups:   gender [5]
+##   gender             candy                    avg_rating
+##   &lt;chr&gt;              &lt;chr&gt;                         &lt;dbl&gt;
+## 1 Female             any_full_sized_candy_bar      0.859
+## 2 I&#39;d rather not say any_full_sized_candy_bar      0.773
+## 3 Male               any_full_sized_candy_bar      0.850
+## 4 Other              any_full_sized_candy_bar      0.881
+## 5 &lt;NA&gt;               any_full_sized_candy_bar      0.860</code></pre>
+<p><br></p>
+</div>
+<div id="what-was-the-most-popular-candy-each-the-us-uk-canada-and-other-countries" class="section level3">
+<h3>What was the most popular candy each the US, UK, Canada and other countries?</h3>
+<pre class="r"><code>candy %&gt;%
+  mutate(country = if_else(country %in% c(&quot;united states&quot;, &quot;canada&quot;, &quot;united kingdom&quot;), 
+                           country, &quot;other&quot;)) %&gt;%
+  group_by(country, candy) %&gt;%
+  summarise(avg_rating = mean(rating_numeric, na.rm = TRUE)) %&gt;%
+  filter(avg_rating == max(avg_rating))</code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;country&#39; (override with `.groups` argument)</code></pre>
+<pre><code>## # A tibble: 4 x 3
+## # Groups:   country [4]
+##   country        candy                               avg_rating
+##   &lt;chr&gt;          &lt;chr&gt;                                    &lt;dbl&gt;
+## 1 canada         any_full_sized_candy_bar                 0.916
+## 2 other          any_full_sized_candy_bar                 0.858
+## 3 united kingdom cash_or_other_forms_of_legal_tender      0.825
+## 4 united states  any_full_sized_candy_bar                 0.848</code></pre>
+<p><br></p>
+</div>
+<div id="what-was-the-msot-popular-candys-in-each-year" class="section level3">
+<h3>What was the msot popular candys in each year?</h3>
+<pre class="r"><code>candy %&gt;%
+  group_by(year, candy) %&gt;%
+  summarise(avg_rating = mean(rating_numeric, na.rm = TRUE)) %&gt;%
+  filter(avg_rating == max(avg_rating))</code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;year&#39; (override with `.groups` argument)</code></pre>
+<pre><code>## # A tibble: 3 x 3
+## # Groups:   year [3]
+##    year candy                    avg_rating
+##   &lt;dbl&gt; &lt;chr&gt;                         &lt;dbl&gt;
+## 1  2015 any_full_sized_candy_bar      0.860
+## 2  2016 any_full_sized_candy_bar      0.835
+## 3  2017 any_full_sized_candy_bar      0.862</code></pre>
 </div>
 </div>
 
